@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import requests # [BƯỚC 1]: Thêm requests để gọi API Google
 from datetime import datetime # [BƯỚC 1]: Thêm datetime để lấy giờ thực tế
+import os
+from dotenv import load_dotenv
 
 app = FastAPI()
 
@@ -28,9 +30,12 @@ class UserInput(BaseModel):
     q8: int
     q9: int
     q10: int
+    
+# Gọi hàm này để Python đọc cái file .env lúc nãy
+load_dotenv()
 
-# [BƯỚC 2]: Dán link Google Apps Script của bạn vào đây
-GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxOmbUue2FebvR4S4DMb3mLETiIDLgEB6PaeHVJPyIni24O0-rQpafvUY15mMYGrGLCYQ/exec"
+# Lấy cái link ra xài
+GOOGLE_SHEET_URL = os.getenv("GOOGLE_SHEET_URL")
 
 # [BƯỚC 3]: Tạo hàm gửi dữ liệu chạy ngầm
 def send_to_google_sheet(payload: dict):
