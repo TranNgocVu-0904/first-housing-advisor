@@ -39,16 +39,16 @@ def analyze_finances(data: UserInput):
     capital_ratio = data.capital / data.price if data.price > 0 else 0
     
     if yolo_score >= 3.5 and capital_ratio < 0.3:
-        archetype = "🦅 ĐẠI BÀNG TỰ DO (Free Eagle)"
+        archetype = "🦅 Free Eagle"
         advice = "You value experiences and currently lack the capital for a safe down payment. High risk of emotional overspending. Advise: Rent for now, enjoy your flexibility, but automate your savings!"
     elif yolo_score >= 3.5 and capital_ratio >= 0.3:
-        archetype = "🐅 HỔ DU MỤC (Nomad Tiger)"
+        archetype = "🐅 Nomad Tiger"
         advice = "You have the capital but your spending habits lean towards high-action and trends. Advise: Rent and invest aggressively in high-yield assets, or buy property specifically to flip."
     elif yolo_score < 3.5 and capital_ratio >= 0.3:
-        archetype = "🏰 LÃNH CHÚA AN CƯ (Settled Lord)"
+        archetype = "🏰 Settled Lord"
         advice = "You are financially and mentally prepared for homeownership! Your grounded habits and solid capital make buying a house a safe, wealth-building move."
     else:
-        archetype = "🐢 RÙA TÍCH LŨY (Accumulating Turtle)"
+        archetype = "🐢 Accumulating Turtle"
         advice = "You have great saving habits but need more capital to safely buy. Advise: Rent temporarily while you grow your savings to hit that 30% safe threshold."
 
     # 3. Financial Projections (10 Years)

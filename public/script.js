@@ -52,6 +52,7 @@ function calcRentSandbox(income, capital, rent, extraSavings, investRate, rentIn
     }
     return data;
 }
+
 function generateQuests(data, financials) {
     const questList = document.getElementById('quest-list');
     const nextLevelTitle = document.getElementById('next-level-title');
@@ -173,7 +174,6 @@ function animateNumber(id, endValue) {
 // --- STATE QUẢN LÝ ---
 let currentStep = 0;
 const userAnswers = {}; 
-let myChart = null;
 
 // --- DOM ELEMENTS ---
 const introContainer = document.getElementById('intro-container');
@@ -189,6 +189,32 @@ const qText = document.getElementById('q-text');
 const currentSlider = document.getElementById('current-slider');
 const sliderDisplay = document.getElementById('slider-display');
 const nextQBtn = document.getElementById('next-q-btn');
+
+// --- HÀM TẠO THƯỚC ĐO CẢM XÚC (VIBE METER) ---
+function updateSliderText(val) {
+    const num = customRound(val);
+    const displayEl = document.getElementById('slider-display');
+    
+    // Đổi size chữ nhỏ lại một chút (từ text-5xl xuống text-3xl) để chứa vừa các câu chữ dài
+    let baseClass = "text-center mb-6 font-mono text-3xl md:text-4xl font-bold transition-colors duration-300 ";
+    
+    if (num === 1) {
+        displayEl.innerHTML = "NO WAY 🙅‍♂️";
+        displayEl.className = baseClass + "text-[#EA738D]"; // Màu xám nhạt
+    } else if (num === 2) {
+        displayEl.innerHTML = "MEH... 🤨";
+        displayEl.className = baseClass + "text-[#E58E61]"; // Màu xám đậm
+    } else if (num === 3) {
+        displayEl.innerHTML = "FIFTY-FIFTY ⚖️";
+        displayEl.className = baseClass + "text-[#E5BD77]"; // Màu Vàng Gold
+    } else if (num === 4) {
+        displayEl.innerHTML = "KINDA TRUE 👀";
+        displayEl.className = baseClass + "text-[#CC7952]"; // Màu Đỏ Cam
+    } else {
+        displayEl.innerHTML = "LITERALLY ME! 🔥";
+        displayEl.className = baseClass + "text-[#8B0000]"; // Màu Đỏ Đậm chủ đạo
+    }
+}
 
 // --- SỰ KIỆN NÚT BẤM ---
 
@@ -215,7 +241,8 @@ document.getElementById('next-to-part2-btn').addEventListener('click', () => {
 
 // Kéo thanh trượt
 currentSlider.addEventListener('input', (e) => {
-    sliderDisplay.innerText = customRound(e.target.value);
+    updateSliderText(e.target.value);
+    updateQuizSliderFill();
 });
 
 // Hàm Load Câu Hỏi
@@ -224,19 +251,27 @@ function loadQuestion(index) {
     qWrapper.classList.add('opacity-0', '-translate-x-5');
     
     setTimeout(() => {
-        qCounter.innerText = `Q${index + 1}`;
+        qCounter.innerText = `Challenge ${index + 1}`;
         qText.innerText = questions[index].text;
         
         const currentQId = questions[index].id;
         currentSlider.value = userAnswers[currentQId] !== undefined ? userAnswers[currentQId] : 3;
-        sliderDisplay.innerText = customRound(currentSlider.value);
+        updateSliderText(currentSlider.value);
+
+        updateQuizSliderFill();
         
         if (index === questions.length - 1) {
-            nextQBtn.innerText = "FINISH 🎯";
-            nextQBtn.className = "w-full py-4 rounded-xl font-mono text-sm font-bold tracking-widest text-[#0a0a12] transition-colors bg-[#ff4d8d] shadow-[0_0_20px_rgba(255,77,141,0.3)] hover:-translate-y-[2px]";
+            // 1. Chữ FINISH: Phóng to 10%, giãn khoảng cách chữ và nghiêng nhẹ sang TRÁI (-rotate-3)
+            nextQBtn.innerHTML = `<span class="inline-block transition-all duration-300 group-hover:scale-110 group-hover:-rotate-3 group-hover:tracking-[6px]">FINISH</span>`;
+            
+            // 2. Class của nút: Thêm chữ 'group' ở ngay đầu tiên
+            nextQBtn.className = "group w-full py-4 rounded-xl font-mono text-sm font-bold tracking-widest text-white transition-all duration-300 bg-[#1F3D2D] hover:-translate-y-[2px]";
         } else {
-            nextQBtn.innerText = "NEXT ⚡";
-            nextQBtn.className = "w-full py-4 rounded-xl font-mono text-sm font-bold tracking-widest text-[#0a0a12] transition-colors bg-[#00e5ff] shadow-[0_0_20px_rgba(0,229,255,0.2)] hover:-translate-y-[2px]";
+            // 1. Chữ NEXT: Phóng to 10%, giãn khoảng cách chữ và nghiêng nhẹ sang PHẢI (rotate-3)
+            nextQBtn.innerHTML = `<span class="inline-block transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:tracking-[6px]">NEXT</span>`;
+            
+            // 2. Class của nút: Thêm chữ 'group' ở ngay đầu tiên
+            nextQBtn.className = "group w-full py-4 rounded-xl font-mono text-sm font-bold tracking-widest text-white transition-all duration-300 bg-[#58806B] hover:-translate-y-[2px]";
         }
         
         qWrapper.classList.remove('opacity-0', '-translate-x-5');
@@ -293,7 +328,7 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch('/api/analyze', {
+        const response = await fetch('http://localhost:8000/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -302,7 +337,7 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
         if (!response.ok) throw new Error("API Error");
         const data = await response.json();
 
-        // CHỖ NÀY LÀ MỚI THÊM: Lưu lại dữ liệu gốc để Sandbox có thể chạy được
+        // Lưu lại dữ liệu gốc để Sandbox có thể chạy được
         baseFinancials = {
             income: payload.income, 
             capital: payload.capital,
@@ -310,7 +345,7 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
             rent: payload.rent
         };
 
-        // Tách Icon và Text từ dữ liệu Python trả về (GIỮ NGUYÊN EMOJI NHƯ BẠN MUỐN)
+        // Tách Icon và Text từ dữ liệu Python trả về
         const parts = data.archetype.split(' ');
         const icon = parts[0]; 
         const text = parts.slice(1).join(' '); 
@@ -344,39 +379,66 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
     }
 });
 
-// Nút Restart
-document.getElementById('restart-btn').addEventListener('click', () => {
-    document.getElementById('advisorForm').reset();
-    for (const key in userAnswers) delete userAnswers[key];
-    
-    // Reset lại thanh trượt Sandbox về 0
-    if(document.getElementById('sandbox-savings')) document.getElementById('sandbox-savings').value = 0;
-    if(document.getElementById('sandbox-price')) document.getElementById('sandbox-price').value = 0;
-    if(document.getElementById('sandbox-savings-val')) document.getElementById('sandbox-savings-val').innerText = "+0 Million/Month";
-    if(document.getElementById('sandbox-price-val')) document.getElementById('sandbox-price-val').innerText = "0%";
-
-    switchScreen(resultContainer, introContainer);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
 
 // --- VẼ BIỂU ĐỒ ---
 function renderChart(buyData, rentData) {
     const ctx = document.getElementById('projectionChart').getContext('2d');
-    if (myChart) myChart.destroy();
+    if (window.myChart) window.myChart.destroy();
 
-    myChart = new Chart(ctx, {
+    window.myChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10'],
             datasets: [
-                { label: 'Buy House Scenario', data: buyData, borderColor: '#00e5ff', backgroundColor: 'rgba(0,229,255,0.07)', fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#00e5ff', pointBorderColor: '#0a0a12', pointBorderWidth: 2 },
-                { label: 'Rent + Invest Scenario', data: rentData, borderColor: '#ff4d8d', backgroundColor: 'rgba(255,77,141,0.07)', fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#ff4d8d', pointBorderColor: '#0a0a12', pointBorderWidth: 2 }
+                { 
+                    label: 'Buy House Scenario', 
+                    data: buyData, 
+                    borderColor: '#9E5C5D', // Màu Rose Dust
+                    backgroundColor: 'rgba(158, 92, 93, 0.1)', 
+                    fill: true, 
+                    tension: 0.4, 
+                    borderWidth: 2.5, 
+                    pointRadius: 4, 
+                    pointBackgroundColor: '#9E5C5D', 
+                    pointBorderColor: '#9E5C5D', // Viền đặc cùng màu Rose Dust
+                    pointBorderWidth: 2 
+                },
+                { 
+                    label: 'Rent + Invest Scenario', 
+                    data: rentData, 
+                    borderColor: '#353924', // Màu Xám Rêu
+                    backgroundColor: 'rgba(53, 57, 36, 0.1)', 
+                    fill: true, 
+                    tension: 0.4, 
+                    borderWidth: 2.5, 
+                    pointRadius: 4, 
+                    pointBackgroundColor: '#353924', 
+                    pointBorderColor: '#353924', // Viền đặc cùng màu Xám Rêu
+                    pointBorderWidth: 2 
+                }
             ]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: { x: { ticks: { color: '#6b6b8a' }, grid: {color: 'rgba(255,255,255,0.03)'} }, y: { ticks: { color: '#6b6b8a' }, grid: {color: 'rgba(255,255,255,0.04)'} } },
-            plugins: { legend: { labels: { color: '#8888aa' } } }
+            responsive: true, 
+            maintainAspectRatio: false,
+            scales: { 
+                x: { 
+                    ticks: { color: '#6b7280' }, 
+                    grid: { display: false } 
+                }, 
+                y: { 
+                    ticks: { color: '#6b7280' }, 
+                    grid: { display: false } 
+                } 
+            },
+            plugins: { 
+                legend: { 
+                    labels: { 
+                        color: '#4b5563', 
+                        font: { family: "'Space Mono', monospace", weight: 'bold' } 
+                    } 
+                } 
+            }
         }
     });
 }
@@ -386,7 +448,7 @@ const savingsSlider = document.getElementById('sandbox-savings');
 const priceSlider = document.getElementById('sandbox-price');
 const interestSlider = document.getElementById('sandbox-interest');
 const investSlider = document.getElementById('sandbox-invest'); 
-const rentIncSlider = document.getElementById('sandbox-rent-inc'); // Dùng ID mới
+const rentIncSlider = document.getElementById('sandbox-rent-inc'); 
 
 function updateSimulation() {
     if (!savingsSlider || !priceSlider || !interestSlider || !investSlider || !rentIncSlider) return;
@@ -395,7 +457,7 @@ function updateSimulation() {
     const priceShift = parseFloat(priceSlider.value);
     const interestRate = parseFloat(interestSlider.value);
     const investRate = parseFloat(investSlider.value); 
-    const rentIncrease = parseFloat(rentIncSlider.value); // Lấy số tiền tăng (Triệu/tháng)
+    const rentIncrease = parseFloat(rentIncSlider.value); 
 
     // Cập nhật chữ hiển thị
     document.getElementById('sandbox-savings-val').innerText = `+${extraSavings} Mil/Mo`;
@@ -407,14 +469,12 @@ function updateSimulation() {
     // Tính toán lại
     const newTargetPrice = baseFinancials.price * (1 + (priceShift / 100));
     const newBuyData = calcBuySandbox(baseFinancials.capital, newTargetPrice, interestRate);
-    
-    // Ném rentIncrease vào hàm Thuê nhà
     const newRentData = calcRentSandbox(baseFinancials.income, baseFinancials.capital, baseFinancials.rent, extraSavings, investRate, rentIncrease);
 
-    if (myChart) {
-        myChart.data.datasets[0].data = newBuyData;
-        myChart.data.datasets[1].data = newRentData;
-        myChart.update();
+    if (window.myChart) {
+        window.myChart.data.datasets[0].data = newBuyData;
+        window.myChart.data.datasets[1].data = newRentData;
+        window.myChart.update();
     }
 }
 
@@ -424,12 +484,118 @@ if (interestSlider) interestSlider.addEventListener('input', updateSimulation);
 if (investSlider) investSlider.addEventListener('input', updateSimulation);
 if (rentIncSlider) rentIncSlider.addEventListener('input', updateSimulation);
 
-// Xử lý Reset thanh trượt
-if(document.getElementById('restart-btn')){
-    document.getElementById('restart-btn').addEventListener('click', () => {
+
+// ==========================================
+// HIỆU ỨNG TÔ MÀU THANH TRƯỢT (WHAT-IF SANDBOX)
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const sliderColors = {
+        'sandbox-savings': '#24282B',   
+        'sandbox-price': '#36436F',     
+        'sandbox-interest': '#D9A05B',  
+        'sandbox-invest': '#5B9DA6',    
+        'sandbox-rent-inc': '#B6000F'   
+    };
+
+    const emptyTrackColor = '#d1d5db'; 
+
+    Object.keys(sliderColors).forEach(id => {
+        const slider = document.getElementById(id);
+        if (slider) {
+            const color = sliderColors[id];
+            
+            const updateFill = () => {
+                const min = parseFloat(slider.min) || 0;
+                const max = parseFloat(slider.max) || 100;
+                const val = parseFloat(slider.value);
+                const percent = ((val - min) / (max - min)) * 100;
+                slider.style.background = `linear-gradient(to right, ${color} ${percent}%, ${emptyTrackColor} ${percent}%)`;
+            };
+
+            updateFill(); 
+            slider.addEventListener('input', updateFill); 
+        }
+    });
+});
+
+// ==========================================
+// HIỆU ỨNG NÚT BẤM (HOVER GIF) & RESTART
+// ==========================================
+
+// --- 1. HIỆU ỨNG TRÁO ẢNH HOVER TỰ ĐỘNG CHO MỌI NÚT ---
+// Tìm tất cả các nút có class 'hover-gif-btn'
+document.querySelectorAll('.hover-gif-btn').forEach(btn => {
+    const icon = btn.querySelector('img'); // Tìm thẻ img nằm trong nút đó
+    if (icon) {
+        const staticSrc = btn.getAttribute('data-static'); // Lấy tên ảnh tĩnh
+        const animSrc = btn.getAttribute('data-anim');     // Lấy tên ảnh động
+
+        if (staticSrc && animSrc) {
+            btn.addEventListener('mouseenter', () => icon.src = animSrc);
+            btn.addEventListener('mouseleave', () => icon.src = staticSrc);
+        }
+    }
+});
+
+// --- 2. SỰ KIỆN CLICK RIÊNG CỦA NÚT RESTART ---
+const restartBtn = document.getElementById('restart-btn');
+if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+        // Reset Form & Xóa câu trả lời cũ
+        document.getElementById('advisorForm').reset();
+        for (const key in userAnswers) delete userAnswers[key];
+        
+        // Reset LẠI ĐỦ 5 THANH TRƯỢT SANDBOX VỀ MẶC ĐỊNH
+        if(document.getElementById('sandbox-savings')) document.getElementById('sandbox-savings').value = 0;
+        if(document.getElementById('sandbox-price')) document.getElementById('sandbox-price').value = 0;
+        if(document.getElementById('sandbox-interest')) document.getElementById('sandbox-interest').value = 9.0;
         if(document.getElementById('sandbox-invest')) document.getElementById('sandbox-invest').value = 8.0;
         if(document.getElementById('sandbox-rent-inc')) document.getElementById('sandbox-rent-inc').value = 0.5;
+
+        // Reset lại chữ hiển thị
+        if(document.getElementById('sandbox-savings-val')) document.getElementById('sandbox-savings-val').innerText = "+0 Mil/Mo";
+        if(document.getElementById('sandbox-price-val')) document.getElementById('sandbox-price-val').innerText = "0%";
+        if(document.getElementById('sandbox-interest-val')) document.getElementById('sandbox-interest-val').innerText = "9.0% / Yr";
         if(document.getElementById('sandbox-invest-val')) document.getElementById('sandbox-invest-val').innerText = "8.0% / Yr";
         if(document.getElementById('sandbox-rent-inc-val')) document.getElementById('sandbox-rent-inc-val').innerText = "+0.5 Mil/Mo";
+
+        // Kích hoạt sự kiện "input" ảo để reset lại dải màu
+        const inputEvent = new Event('input', { bubbles: true });
+        
+        // Đổi thành mảng chứa 5 thanh trượt Sandbox trực tiếp
+        const sandboxSliders = [
+            document.getElementById('sandbox-savings'),
+            document.getElementById('sandbox-price'),
+            document.getElementById('sandbox-interest'),
+            document.getElementById('sandbox-invest'),
+            document.getElementById('sandbox-rent-inc')
+        ];
+        
+        sandboxSliders.forEach(slider => {
+            if (slider) slider.dispatchEvent(inputEvent);
+        });
+
+        // Chuyển về màn hình Intro
+        switchScreen(resultContainer, introContainer);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+}
+// ==========================================
+// HIỆU ỨNG TÔ MÀU THANH TRƯỢT (CÂU HỎI TRẮC NGHIỆM)
+// ==========================================
+const quizSlider = document.getElementById('current-slider');
+const quizActiveColor = '#990011'; // Màu đỏ chủ đạo của bài test
+const quizEmptyColor = '#E8E2D2';  // Màu xám nhạt của rãnh trống
+
+function updateQuizSliderFill() {
+    if (!quizSlider) return;
+    const min = parseFloat(quizSlider.min) || 1;
+    const max = parseFloat(quizSlider.max) || 5;
+    const val = parseFloat(quizSlider.value);
+    
+    // Tính toán phần trăm (từ 1 đến 5)
+    const percent = ((val - min) / (max - min)) * 100;
+    
+    // Đổ màu rãnh
+    quizSlider.style.background = `linear-gradient(to right, ${quizActiveColor} ${percent}%, ${quizEmptyColor} ${percent}%)`;
 }
