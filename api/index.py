@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks # [BƯỚC 1]: Thêm BackgroundTasks
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import requests # [BƯỚC 1]: Thêm requests để gọi API Google
+from datetime import datetime # [BƯỚC 1]: Thêm datetime để lấy giờ thực tế
 
 app = FastAPI()
 
@@ -11,7 +13,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 class UserInput(BaseModel):
     income: float
     capital: float
@@ -28,8 +29,20 @@ class UserInput(BaseModel):
     q9: int
     q10: int
 
+# [BƯỚC 2]: Dán link Google Apps Script của bạn vào đây
+GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxOmbUue2FebvR4S4DMb3mLETiIDLgEB6PaeHVJPyIni24O0-rQpafvUY15mMYGrGLCYQ/exec"
+
+# [BƯỚC 3]: Tạo hàm gửi dữ liệu chạy ngầm
+def send_to_google_sheet(payload: dict):
+    try:
+        requests.post(GOOGLE_SHEET_URL, json=payload)
+        print("Đã gửi dữ liệu lên Google Sheet thành công!")
+    except Exception as e:
+        print(f"Lỗi khi lưu vào Google Sheet: {e}")
+
+# [BƯỚC 4]: Thêm tham số background_tasks vào hàm
 @app.post("/api/analyze")
-def analyze_finances(data: UserInput):
+def analyze_finances(data: UserInput, background_tasks: BackgroundTasks):
     # 1. Psychological Scoring
     yolo_score = (data.q1 + data.q2 + data.q3 + data.q4 + data.q5) / 5
     safety_score = (data.q6 + data.q7) / 2
@@ -77,6 +90,19 @@ def analyze_finances(data: UserInput):
         accumulated_investment = (accumulated_investment * 1.08) + yearly_surplus
         current_rent_monthly *= 1.03 # Rent inflation
         rent_data.append(round(accumulated_investment, 2))
+
+    # [BƯỚC 4 Tiếp tục]: Đóng gói dữ liệu và nhờ BackgroundTasks đem đi gửi
+    sheet_payload = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "income": data.income,
+        "capital": data.capital,
+        "price": data.price,
+        "rent": data.rent,
+        "q1": data.q1, "q2": data.q2, "q3": data.q3, "q4": data.q4, "q5": data.q5,
+        "q6": data.q6, "q7": data.q7, "q8": data.q8, "q9": data.q9, "q10": data.q10,
+        "archetype": archetype 
+    }
+    background_tasks.add_task(send_to_google_sheet, sheet_payload)
 
     return {
         "yolo_score": round(yolo_score, 1),
