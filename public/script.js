@@ -357,6 +357,28 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
 
         generateQuests(data, payload);
 
+        // ==================================================
+        // BẮN DỮ LIỆU LÊN GOOGLE SHEET
+        // ==================================================
+        const sheetPayload = {
+            timestamp: new Date().toLocaleString('vi-VN'),
+            income: payload.income,
+            capital: payload.capital,
+            price: payload.price,
+            rent: payload.rent,
+            q1: payload.q1, q2: payload.q2, q3: payload.q3, q4: payload.q4, q5: payload.q5,
+            q6: payload.q6, q7: payload.q7, q8: payload.q8, q9: payload.q9, q10: payload.q10,
+            archetype: text // Lưu luôn cái tên Archetype (VD: RÙA TÍCH LŨY)
+        };
+
+        // Bắn dữ liệu đi trong im lặng (không làm chậm trải nghiệm của người dùng)
+        fetch('https://script.google.com/macros/s/AKfycbxOmbUue2FebvR4S4DMb3mLETiIDLgEB6PaeHVJPyIni24O0-rQpafvUY15mMYGrGLCYQ/exec', {
+            method: 'POST',
+            body: JSON.stringify(sheetPayload),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' } // Dùng text/plain để né lỗi bảo mật CORS
+        }).catch(err => console.log("Lỗi gửi Sheet nhưng không sao: ", err));
+        // ==================================================
+
         // Vẽ biểu đồ
         renderChart(data.buy_data, data.rent_data);
 
