@@ -66,48 +66,112 @@ function generateQuests(data, financials) {
     let nextRank = "";
 
     // LOGIC TẠO NHIỆM VỤ DỰA TRÊN ARCHETYPE
-    if (archetype.includes("RÙA TÍCH LŨY")) {
-        const targetCap = financials.price * 0.3; // 30% giá nhà
+    if (archetype.includes("Accumulating Turtle")) {
+        const targetCap = financials.price * 0.3; // 30% down payment
         quests = [
-            { text: `Tăng vốn tự có lên ${targetCap.toFixed(0)} triệu (Đạt 30% giá nhà)`, icon: "💰" },
-            { text: "Giữ điểm YOLO dưới mức 3.0 trong 6 tháng tới", icon: "🛡️" },
-            { text: "Thiết lập quỹ dự phòng khẩn cấp tương đương 3 tháng thu nhập", icon: "🏦" }
+            { text: `Increase your equity to ${targetCap.toFixed(0)} million (Reach 30% down payment)`, icon: '<img src="gif/savings.gif" class="w-8 h-8 object-contain">' },
+            { text: "Keep your YOLO score below 3.0 for the next 6 months", icon: '<img src="gif/shield.gif" class="w-8 h-8 object-contain">' },
+            { text: "Build an emergency fund equal to 3 months of income", icon: '<img src="gif/safe-deposit-box.gif" class="w-8 h-8 object-contain">' }
         ];
-        nextRank = "🏰 LÃNH CHÚA AN CƯ";
+        nextRank = 'Settled Lord <img src="gif/castle.gif" class="w-7 h-7 inline-block mb-2 object-contain">';
     } 
-    else if (archetype.includes("ĐẠI BÀNG TỰ DO")) {
+    else if (archetype.includes("Free Eagle")) {
         quests = [
-            { text: "Gia tăng thu nhập thụ động để bù đắp 50% tiền thuê nhà", icon: "💸" },
-            { text: "Đầu tư ít nhất 20% thu nhập hàng tháng vào tài sản sinh lời", icon: "📈" },
-            { text: "Tìm kiếm cơ hội bất động sản có khả năng khai thác dòng tiền (AirBnb/Cho thuê)", icon: "🔎" }
+            { text: "Generate passive income to cover 50% of your monthly rent", icon: '<img src="gif/money.gif" class="w-8 h-8 object-contain">' },
+            { text: "Invest at least 20% of your monthly income in high-yield assets", icon: '<img src="gif/motivation.gif" class="w-8 h-8 object-contain">' },
+            { text: "Scout real estate opportunities with cash-flow potential (Airbnb/Rental)", icon: '<img src="gif/radar.gif" class="w-8 h-8 object-contain">' }
         ];
-        nextRank = "🐆 HỔ DU MỤC";
+        nextRank = 'Nomad Tiger <img src="gif/tiger.gif" class="w-7 h-7 inline-block mb-2 object-contain">';
     }
     else {
-        // Mặc định cho các nhóm khác
+        // Mặc định cho các nhóm khác (Settled Lord, Nomad Tiger)
         quests = [
-            { text: "Tối ưu hóa bảng cân đối tài sản hiện tại", icon: "⚖️" },
-            { text: "Nghiên cứu sâu về đòn bẩy ngân hàng (Mortgage Leverage)", icon: "📖" },
-            { text: "Duy trì kỷ luật chi tiêu để đạt mục tiêu tự do tài chính", icon: "🎯" }
+            { text: "Optimize your current personal balance sheet", icon: '<img src="gif/scale.gif" class="w-8 h-8 object-contain">' },
+            { text: "Deep dive into financial leverage strategies (Mortgage Leverage)", icon: '<img src="gif/spell-book.gif" class="w-8 h-8 object-contain">' },
+            { text: "Maintain spending discipline to achieve ultimate financial freedom", icon: '<img src="gif/target.gif" class="w-8 h-8 object-contain">' }
         ];
-        nextRank = "👑 REAL ESTATE TYCOON";
+        nextRank = 'REAL ESTATE TYCOON <img src="gif/crown.gif" class="w-7 h-7 inline-block mb-2 object-contain">';
     }
+
+
+
+    // nextLevelTitle.innerHTML = nextRank;
+
+    // nextLevelTitle.className = "text-[#722f37] font-bold";
+
+
+    
+    // JS tự động in chữ Next Rank lúc ban đầu
+    nextLevelTitle.innerHTML = `<span class="text-[#722f37] font-bold uppercase">Next Rank:</span> <span class="text-[#6F8A4B] font-bold text-[15px] tracking-normal">${nextRank}</span>`;
+
+    let completedQuests = 0; // Biến đếm số nhiệm vụ đã làm
+    const totalQuests = quests.length; // Thường là 3 nhiệm vụ
+    
+    // Đặt thanh kinh nghiệm về 0% lúc ban đầu
+    progress.style.width = "0%";
 
     // Render Quests lên giao diện
     quests.forEach((q, index) => {
         const div = document.createElement('div');
-        div.className = "flex items-start gap-3 bg-white/5 p-4 rounded-xl border border-white/5 hover:border-white/10 transition-all group";
+        
+        // Thêm class 'cursor-pointer' để hiện hình bàn tay khi lia chuột vào, báo hiệu có thể click
+        div.className = "flex items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-[#9BBA74] hover:bg-[#9BBA74]/5 transition-all group shadow-sm cursor-pointer relative overflow-hidden";
+        
         div.innerHTML = `
-            <span class="text-lg">${q.icon}</span>
-            <p class="text-[14px] text-[#e8e8f0] group-hover:text-[#ffd166] transition-colors">${q.text}</p>
+            <div class="quest-icon transition-all duration-300 z-10">${q.icon}</div>
+            <p class="quest-text relative text-[15.5px] text-[#B0B9A6] group-hover:text-[#58806B] group-hover:font-bold transition-all duration-300 leading-snug z-10">${q.text}</p>
+            <div class="done-overlay absolute inset-0 bg-[#800000]/20 scale-x-0 origin-left transition-transform duration-500"></div>
         `;
+        // THÊM SỰ KIỆN CLICK CHO TỪNG NHIỆM VỤ
+        div.addEventListener('click', () => {
+            const isDone = div.classList.contains('is-done');
+            
+            if (!isDone) {
+                // 1. Đánh dấu hoàn thành
+                div.classList.add('is-done', 'border-[#800000]');
+                div.querySelector('.quest-text').classList.add('line-through', 'opacity-60', 'decoration-[#800000]', 'decoration-2'); // Gạch ngang chữ
+                div.querySelector('.quest-icon').style.filter = "grayscale(100%) opacity(50%)"; // Làm mờ icon
+                div.querySelector('.done-overlay').classList.replace('scale-x-0', 'scale-x-100'); // Trải màu nền
+                
+                completedQuests++;
+            } else {
+                // 2. Hủy đánh dấu (nếu người dùng đổi ý click lại)
+                div.classList.remove('is-done', 'border-[#800000]');
+                div.querySelector('.quest-text').classList.remove('line-through', 'opacity-60', 'decoration-[#800000]', 'decoration-2');
+                div.querySelector('.quest-icon').style.filter = "none";
+                div.querySelector('.done-overlay').classList.replace('scale-x-100', 'scale-x-0');
+                
+                completedQuests--;
+            }
+
+            // 3. Cập nhật thanh Progress Bar
+            const percent = (completedQuests / totalQuests) * 100;
+            progress.style.width = `${percent}%`;
+
+            // 4. Kiểm tra MỞ KHÓA NEXT RANK
+            if (completedQuests === totalQuests) {
+                // Hoàn thành 3/3 -> Đổi chữ, thêm hiệu ứng nảy (bounce)
+                nextLevelTitle.innerHTML = `<span class="flex items-center gap-1"> <img src="gif/fireworks.gif" class="w-7 h-7 object-contain"> 
+                        <span>UNLOCKED:</span> 
+                    <span class="text-[#9BBA74] font-bold text-[15px] tracking-normal">${nextRank}</span>
+                </span>
+                `;
+                nextLevelTitle.classList.add('animate-bounce');
+                
+                setTimeout(() => {
+                    nextLevelTitle.classList.remove('animate-bounce');
+                }, 1500);
+            } else {
+                // Chưa hoàn thành đủ -> Trả về trạng thái cũ (Thêm lại chữ Next Rank màu đỏ bị thiếu)
+                nextLevelTitle.innerHTML = `<span class="text-[#722f37] font-bold uppercase">Next Rank:</span> <span class="text-[#6F8A4B] font-bold text-[15px] tracking-normal">${nextRank}</span>`;
+                nextLevelTitle.classList.remove('animate-bounce');
+            }
+        });
+
         questList.appendChild(div);
     });
-
-    nextLevelTitle.innerHTML = `Next Rank: <span class="text-[#ffd166] font-bold">${nextRank}</span>`;
     
-    // Chạy thanh progress sau khi hiện màn hình kết quả
-    setTimeout(() => progress.style.width = "45%", 500);
+
 }
 
 // --- HÀM HELPER ---
@@ -195,24 +259,25 @@ function updateSliderText(val) {
     const num = customRound(val);
     const displayEl = document.getElementById('slider-display');
     
-    // Đổi size chữ nhỏ lại một chút (từ text-5xl xuống text-3xl) để chứa vừa các câu chữ dài
-    let baseClass = "text-center mb-6 font-mono text-3xl md:text-4xl font-bold transition-colors duration-300 ";
+    // Thêm 'flex justify-center items-center gap-3' để chữ và hình TỰ ĐỘNG nằm ngay ngắn thẳng hàng ngang
+    let baseClass = "flex justify-center items-center gap-3 mb-6 font-mono text-3xl md:text-4xl font-bold transition-colors duration-300 ";
     
     if (num === 1) {
-        displayEl.innerHTML = "NO WAY 🙅‍♂️";
-        displayEl.className = baseClass + "text-[#EA738D]"; // Màu xám nhạt
+        // Đã xóa span mt-7 gây lệch chữ
+        displayEl.innerHTML = 'NO WAY <img src="gif/no.gif" alt="Nope" class="w-12 h-12 md:w-12 md:h-12 object-contain">';
+        displayEl.className = baseClass + "text-[#EA738D]"; 
     } else if (num === 2) {
-        displayEl.innerHTML = "MEH... 🤨";
-        displayEl.className = baseClass + "text-[#E58E61]"; // Màu xám đậm
+        displayEl.innerHTML = 'MEH... <img src="gif/thinking.gif" alt="Meh" class="w-12 h-12 md:w-12 md:h-12 object-contain">';
+        displayEl.className = baseClass + "text-[#E58E61]"; 
     } else if (num === 3) {
-        displayEl.innerHTML = "FIFTY-FIFTY ⚖️";
-        displayEl.className = baseClass + "text-[#E5BD77]"; // Màu Vàng Gold
+        displayEl.innerHTML = 'FIFTY-FIFTY <img src="gif/balance.gif" alt="Scale" class="w-12 h-12 md:w-12 md:h-12 object-contain">';
+        displayEl.className = baseClass + "text-[#E5BD77]"; 
     } else if (num === 4) {
-        displayEl.innerHTML = "KINDA TRUE 👀";
-        displayEl.className = baseClass + "text-[#CC7952]"; // Màu Đỏ Cam
+        displayEl.innerHTML = 'KINDA TRUE <img src="gif/decision-making.gif" alt="Kinda" class="w-12 h-12 md:w-12 md:h-12 object-contain">';
+        displayEl.className = baseClass + "text-[#CC7952]"; 
     } else {
-        displayEl.innerHTML = "LITERALLY ME! 🔥";
-        displayEl.className = baseClass + "text-[#8B0000]"; // Màu Đỏ Đậm chủ đạo
+        displayEl.innerHTML = 'LITERALLY ME! <img src="gif/fire.gif" alt="Fire" class="w-12 h-12 md:w-12 md:h-12 object-contain">';
+        displayEl.className = baseClass + "text-[#8B0000]"; 
     }
 }
 
@@ -231,7 +296,7 @@ document.getElementById('next-to-part2-btn').addEventListener('click', () => {
     const ren = document.getElementById('rent').value;
 
     if (!inc || !cap || !pri || !ren) {
-        alert("Please fill in all financial details!");
+        showCustomAlert("Please fill in all financial details to continue!");
         return;
     }
     currentStep = 0;
@@ -255,7 +320,7 @@ function loadQuestion(index) {
         qText.innerText = questions[index].text;
         
         const currentQId = questions[index].id;
-        currentSlider.value = userAnswers[currentQId] !== undefined ? userAnswers[currentQId] : 3;
+        currentSlider.value = userAnswers[currentQId] !== undefined ? userAnswers[currentQId] : 1;
         updateSliderText(currentSlider.value);
 
         updateQuizSliderFill();
@@ -328,6 +393,7 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
     };
 
     try {
+        // Đổi từ fetch('http://localhost:8000/api/analyze') nếu muốn chạy local:
         const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -345,13 +411,12 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
             rent: payload.rent
         };
 
-        // Tách Icon và Text từ dữ liệu Python trả về
+        // Tách Icon (bây giờ là tên file GIF) và Text từ dữ liệu Python trả về
         const parts = data.archetype.split(' ');
-        const icon = parts[0]; 
-        const text = parts.slice(1).join(' '); 
+        const iconFilename = parts[0]; // VD: "eagle.gif"
+        const text = parts.slice(1).join(' '); // VD: "Free Eagle"
 
-        // Gán dữ liệu vào DOM
-        document.getElementById('archetype-icon').innerText = icon;
+        document.getElementById('archetype-icon').innerHTML = `<img src="${iconFilename}" alt="Archetype" class="w-12 h-12 md:w-16 md:h-16 object-contain inline-block">`;
         document.getElementById('archetype-text').innerText = text;
         document.getElementById('advice-text').innerText = data.advice;
 
@@ -374,7 +439,7 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
         }, 1200);
 
     } catch (error) {
-        alert("AI Brain is sleeping! Lỗi kết nối.");
+        showCustomAlert("AI Brain is sleeping! Mất kết nối server.");
         switchScreen(loadingContainer, submitContainer, 'flex');
     }
 });
@@ -599,3 +664,44 @@ function updateQuizSliderFill() {
     // Đổ màu rãnh
     quizSlider.style.background = `linear-gradient(to right, ${quizActiveColor} ${percent}%, ${quizEmptyColor} ${percent}%)`;
 }
+
+// --- HÀM ĐIỀU KHIỂN CUSTOM ALERT ---
+function showCustomAlert(message) {
+    const alertModal = document.getElementById('custom-alert');
+    const alertBox = document.getElementById('custom-alert-box');
+    const alertText = document.getElementById('custom-alert-text');
+    
+    // Gắn câu thông báo vào hộp
+    alertText.innerText = message;
+    
+    // Hiện Modal lên (xóa class hidden)
+    alertModal.classList.remove('hidden');
+    
+    // Kích hoạt hiệu ứng mờ dần và phóng to (delay 10ms để Tailwind kịp nhận class)
+    setTimeout(() => {
+        alertModal.classList.remove('opacity-0');
+        alertModal.classList.add('opacity-100');
+        alertBox.classList.remove('scale-90');
+        alertBox.classList.add('scale-100');
+    }, 10);
+}
+
+function hideCustomAlert() {
+    const alertModal = document.getElementById('custom-alert');
+    const alertBox = document.getElementById('custom-alert-box');
+    
+    // Chạy ngược lại hiệu ứng: mờ đi và thu nhỏ
+    alertModal.classList.remove('opacity-100');
+    alertModal.classList.add('opacity-0');
+    alertBox.classList.remove('scale-100');
+    alertBox.classList.add('scale-90');
+    
+    // Đợi 300ms cho hiệu ứng chạy xong rồi mới ẩn hẳn (thêm hidden)
+    setTimeout(() => {
+        alertModal.classList.add('hidden');
+    }, 300);
+}
+
+// Bắt sự kiện bấm nút "GOT IT" hoặc bấm ra ngoài nền đen để đóng
+document.getElementById('close-alert-btn').addEventListener('click', hideCustomAlert);
+document.getElementById('custom-alert-backdrop').addEventListener('click', hideCustomAlert);

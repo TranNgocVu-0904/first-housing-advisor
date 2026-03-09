@@ -57,17 +57,17 @@ def analyze_finances(data: UserInput, background_tasks: BackgroundTasks):
     capital_ratio = data.capital / data.price if data.price > 0 else 0
     
     if yolo_score >= 3.5 and capital_ratio < 0.3:
-        archetype = "🦅 Free Eagle"
+        archetype = "gif/eagle.gif Free Eagle"
         advice = "You value experiences and currently lack the capital for a safe down payment. High risk of emotional overspending. Advise: Rent for now, enjoy your flexibility, but automate your savings!"
     elif yolo_score >= 3.5 and capital_ratio >= 0.3:
-        archetype = "🐅 Nomad Tiger"
+        archetype = "gif/tiger.gif Nomad Tiger"
         advice = "You have the capital but your spending habits lean towards high-action and trends. Advise: Rent and invest aggressively in high-yield assets, or buy property specifically to flip."
     elif yolo_score < 3.5 and capital_ratio >= 0.3:
-        archetype = "🏰 Settled Lord"
+        archetype = "gif/castle.gif Settled Lord"
         advice = "You are financially and mentally prepared for homeownership! Your grounded habits and solid capital make buying a house a safe, wealth-building move."
     else:
-        archetype = "🐢 Accumulating Turtle"
-        advice = "You have great saving habits but need more capital to safely buy. Advise: Rent temporarily while you grow your savings to hit that 30% safe threshold."
+        archetype = "gif/turtle.gif Accumulating Turtle"
+        advice = "You have great saving habits but need more capital to safely buy. Advise: Rent temporarily while you grow your savings to hit that 30%% safe threshold."
 
     # 3. Financial Projections (10 Years)
     buy_data = []
@@ -105,7 +105,8 @@ def analyze_finances(data: UserInput, background_tasks: BackgroundTasks):
         "rent": data.rent,
         "q1": data.q1, "q2": data.q2, "q3": data.q3, "q4": data.q4, "q5": data.q5,
         "q6": data.q6, "q7": data.q7, "q8": data.q8, "q9": data.q9, "q10": data.q10,
-        "archetype": archetype 
+        "archetype": archetype.split(" ", 1)[1]
+        
     }
     background_tasks.add_task(send_to_google_sheet, sheet_payload)
 
