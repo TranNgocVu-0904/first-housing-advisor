@@ -394,7 +394,7 @@ document.getElementById('advisorForm').addEventListener('submit', async (e) => {
 
     try {
         // Đổi từ fetch('http://localhost:8000/api/analyze') nếu muốn chạy local:
-        const response = await fetch('https://smart-first-housing-advisor.vercel.app/api/analyze', {
+        const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
