@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import requests 
-from datetime import datetime, timedelta # Đã thêm timedelta để tính giờ VN
+from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
 
@@ -35,7 +35,7 @@ class UserInput(BaseModel):
 load_dotenv()
 GOOGLE_SHEET_URL = os.getenv("GOOGLE_SHEET_URL")
 
-# Hàm gửi dữ liệu sang Google Sheet
+# Function to send data to Google Sheet
 def send_to_google_sheet(payload: dict):
     try:
         requests.post(GOOGLE_SHEET_URL, json=payload)
@@ -43,7 +43,6 @@ def send_to_google_sheet(payload: dict):
     except Exception as e:
         print(f"Lỗi khi lưu vào Google Sheet: {e}")
 
-# ĐÃ XÓA BackgroundTasks, chỉ giữ lại (data: UserInput)
 @app.post("/api/analyze")
 def analyze_finances(data: UserInput):
     # 1. Psychological Scoring
@@ -94,10 +93,10 @@ def analyze_finances(data: UserInput):
         current_rent_monthly *= 1.03 # Rent inflation
         rent_data.append(round(accumulated_investment, 2))
 
-    # TÍNH GIỜ VIỆT NAM (UTC + 7)
-    vn_time = datetime.utcnow() + timedelta(hours=7)
+    # VIETNAM TIME (UTC + 7)
+    vn_time = datetime.now(timezone.utc) + timedelta(hours=7)
 
-    # Đóng gói dữ liệu
+    # Data Packaging
     sheet_payload = {
         "timestamp": vn_time.strftime("%Y-%m-%d %H:%M:%S"),
         "income": data.income,
@@ -109,10 +108,10 @@ def analyze_finances(data: UserInput):
         "archetype": archetype.split(" ", 1)[1]
     }
     
-    # GỌI HÀM ĐỒNG BỘ: Ép nó gửi xong dữ liệu sang Google Sheet rồi mới được chạy tiếp
+    # CALL SYNCHRONIZATION FUNCTION: Force it to send the data to Google Sheet before continuing.
     send_to_google_sheet(sheet_payload)
 
-    # Trả kết quả về cho Web
+    # Return the results to the Web
     return {
         "yolo_score": round(yolo_score, 1),
         "safety_score": round(safety_score, 1),

@@ -6,7 +6,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Quả cầu phát sáng (Ambient Orbs) - Ánh sáng cực nhẹ */
+/* Ambient Orbs - Extremely soft light */
 .orb {
     position: fixed;
     border-radius: 50%;
@@ -18,12 +18,12 @@ body {
 .orb-1 { width: 600px; height: 600px; background: #990011; top: -200px; right: -200px; }
 .orb-2 { width: 400px; height: 400px; background: #E17055; bottom: 10%; left: -150px; }
 
-/* Hiệu ứng chuyển cảnh mượt mà */
+/* Transition effects */
 .screen-transition {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hiệu ứng lơ lửng cho AI GIF */
+/* Floating effect for GIF images */
 @keyframes float {
     0% { transform: translateY(0px); }
     50% { transform: translateY(-12px); }
@@ -34,5 +34,5 @@ body {
     animation: float 3s ease-in-out infinite;
 }
 
-/* Tiện ích font */
+/* Text Font */
 .font-mono { font-family: 'Space Mono', monospace; }
